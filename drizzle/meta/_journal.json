@@ -8,6 +8,27 @@
       "when": 1714817494574,
       "tag": "0000_panoramic_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1718810830750,
+      "tag": "0001_hesitant_dust",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1719155580724,
+      "tag": "0002_outstanding_mandrill",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1719163163391,
+      "tag": "0003_odd_shadow_king",
+      "breakpoints": true
     }
   ]
 }
