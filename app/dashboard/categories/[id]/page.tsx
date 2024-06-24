@@ -1,8 +1,9 @@
 import React from "react";
-import CategoryForm from "./components/CategoryForm";
+import CategoryForm from "../components/CategoryForm";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { menuItemCategory } from "@/lib/schema";
+import { redirect } from "next/navigation";
 
 async function page({
   params: { id },
@@ -22,6 +23,9 @@ async function page({
         imgUrl: true,
       },
     });
+    if (!category) {
+      return redirect("/dashboard/categories");
+    }
   }
   return (
     <div>

@@ -68,30 +68,64 @@ function CategoryForm({
   async function onSubmit(values: CategoryFormValues) {
     try {
       setLoading(true);
-      console.log(values);
-      await fetch("/api/categories", {
-        method: "POST",
-        body: JSON.stringify(values),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      if (initialData) {
+        const res = await fetch(`/api/categories/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(values),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        toast({
+          description: "Catégorie modifiée avec succès",
+        });
+        if (!res.ok) {
+          throw new Error();
+        }
+      } else {
+        const res = await fetch("/api/categories", {
+          method: "POST",
+          body: JSON.stringify(values),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        toast({
+          description: "Catégorie ajoutée avec succès",
+        });
+        if (!res.ok) {
+          throw new Error();
+        }
+      }
       form.reset();
       setLoading(false);
-      toast({
-        description: "Catégorie ajouté avec succès",
-      });
+      router.push("/dashboard/categories");
     } catch (err) {
-      console.error(err);
+      setLoading(false);
+      toast({
+        description: "Une erreur est survenue",
+        variant: "destructive",
+      });
     }
   }
   const handleDelete = async () => {
     try {
-      await fetch(`/api/categories/${id}`, {
+      const res = await fetch(`/api/categories/${id}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        throw new Error();
+      }
+      toast({
+        description: "Catégorie supprimée avec succès",
+      });
       router.push("/dashboard/categories");
-    } catch (err) {}
+    } catch (err) {
+      toast({
+        description: "Une erreur est survenue",
+        variant: "destructive",
+      });
+    }
   };
   return (
     <div>
@@ -178,7 +212,9 @@ function CategoryForm({
                 </FormItem>
               )}
             />
-            <Button type="submit">Ajouter</Button>
+            <Button type="submit" disabled={loading || !form.formState.isDirty}>
+              {initialData ? "Modifier" : "Ajouter"}
+            </Button>
           </form>
         </Form>
       </div>

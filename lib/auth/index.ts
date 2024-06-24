@@ -23,7 +23,6 @@ export const isAdmin = async (token: string | undefined): Promise<boolean> => {
   if (!res) {
     return false;
   }
-  console.log(token);
-  console.log(res.payload);
+
   return res.payload.type === "admin" || res.payload.type === "superadmin";
 };
