@@ -8,28 +8,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CldUploadWidget } from "next-cloudinary";
 import ImageUpload from "@/components/ImageUpload";
 import { useState } from "react";
 import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
+import DeleteAction from "./DeleteAction";
 
 export const creationFormSchema = z.object({
   name: z
@@ -39,8 +29,9 @@ export const creationFormSchema = z.object({
     })
     .max(50, {
       message: "Le nom ne doit pas dépasser 50 caractères",
-    }),
-  description: z.string(),
+    })
+    .trim(),
+  description: z.string().trim(),
   imgUrl: z.string().min(1, {
     message: "L'image est obligatoire",
   }),
@@ -99,7 +90,8 @@ function CategoryForm({
       }
       form.reset();
       setLoading(false);
-      router.push("/dashboard/categories");
+      await router.push("/dashboard/categories");
+      router.refresh();
     } catch (err) {
       setLoading(false);
       toast({
@@ -108,25 +100,7 @@ function CategoryForm({
       });
     }
   }
-  const handleDelete = async () => {
-    try {
-      const res = await fetch(`/api/categories/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        throw new Error();
-      }
-      toast({
-        description: "Catégorie supprimée avec succès",
-      });
-      router.push("/dashboard/categories");
-    } catch (err) {
-      toast({
-        description: "Une erreur est survenue",
-        variant: "destructive",
-      });
-    }
-  };
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -134,29 +108,11 @@ function CategoryForm({
           {initialData ? "Modifier la catégorie" : "Ajouter une catégorie"}
         </h1>
         {initialData ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                Supprimer <Trash className="w-4 h-4 ml-2" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Etes-vous sûr de vouloir supprimer cette catégorie ?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est irréversible
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <DeleteAction id={id}>
+            <Button variant="destructive">
+              Supprimer <Trash className="w-4 h-4 ml-2" />
+            </Button>
+          </DeleteAction>
         ) : null}
       </div>
 

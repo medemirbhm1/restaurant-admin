@@ -30,7 +30,8 @@ export const loginFormSchema = z.object({
     })
     .max(50, {
       message: "Le nom d'utilisateur ne doit pas dépasser 50 caractères",
-    }),
+    })
+    .trim(),
   password: z.string(),
 });
 
