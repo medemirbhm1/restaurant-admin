@@ -29,6 +29,27 @@
       "when": 1719163163391,
       "tag": "0003_odd_shadow_king",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1719483720995,
+      "tag": "0004_bumpy_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1719499436161,
+      "tag": "0005_bright_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1719602620589,
+      "tag": "0006_bored_mordo",
+      "breakpoints": true
     }
   ]
 }

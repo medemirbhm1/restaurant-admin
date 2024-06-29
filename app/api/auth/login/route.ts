@@ -2,7 +2,7 @@ import { loginFormSchema } from "@/app/login/page";
 import { createToken } from "@/lib/auth/token";
 import { comparePassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
-import { user } from "@/lib/schema";
+import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { serialize } from "cookie";
 import { NextResponse } from "next/server";
@@ -14,8 +14,8 @@ export async function POST(request: Request) {
       throw new Error("Invalid username or password");
     }
     const { username, password } = body;
-    const u = await db.query.user.findFirst({
-      where: eq(user.username, username),
+    const u = await db.query.users.findFirst({
+      where: eq(users.username, username),
     });
     if (!u) {
       throw new Error("User not found");

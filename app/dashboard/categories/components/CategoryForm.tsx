@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,9 +18,17 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ImageUpload from "@/components/ImageUpload";
 import { useState } from "react";
-import { Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DeleteAction from "./DeleteAction";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  type menuItemCategory,
+  supplements,
+  type supplement,
+} from "@/lib/schema";
+import { SupplementDialog } from "./SupplementDialog";
+import SupplementAction from "./SupplementAction";
 
 export const creationFormSchema = z.object({
   name: z
@@ -35,25 +44,37 @@ export const creationFormSchema = z.object({
   imgUrl: z.string().min(1, {
     message: "L'image est obligatoire",
   }),
+  supplements: z.array(z.number()),
 });
 type CategoryFormValues = z.infer<typeof creationFormSchema>;
 
 function CategoryForm({
   initialData,
   id,
+  supplements,
 }: {
-  initialData?: CategoryFormValues | null;
+  initialData?: menuItemCategory | null;
   id: string;
+  supplements: supplement[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(creationFormSchema),
-    defaultValues: initialData || {
-      name: "",
-      description: "",
-    },
+    defaultValues: initialData
+      ? {
+          name: initialData.name,
+          description: initialData.description,
+          imgUrl: initialData.imgUrl,
+          supplements: initialData.supplements.map(
+            (supplement) => supplement.id
+          ),
+        }
+      : {
+          name: "",
+          description: "",
+        },
   });
 
   async function onSubmit(values: CategoryFormValues) {
@@ -164,6 +185,63 @@ function CategoryForm({
                       onRemove={() => field.onChange("")}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="supplements"
+              render={() => (
+                <FormItem>
+                  <div className="mb-4">
+                    <div className="flex justify-between">
+                      <FormLabel className="text-base">Suppléments</FormLabel>
+                      <SupplementDialog>
+                        <Button size="icon">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </SupplementDialog>
+                    </div>
+                    <FormDescription>
+                      Sélectionnez les suppléments disponibles pour cette
+                      catégorie
+                    </FormDescription>
+                  </div>
+                  {supplements.map((item) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name="supplements"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={item.id}
+                            className="flex flex-row items-center space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              {item.name}
+                            </FormLabel>
+                            <SupplementAction supplementData={item} />
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
                   <FormMessage />
                 </FormItem>
               )}

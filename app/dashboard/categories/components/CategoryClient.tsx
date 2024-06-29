@@ -7,7 +7,7 @@ import Link from "next/link";
 import { columns } from "./Columns";
 
 async function CategoryClient() {
-  const categories = await db.query.menuItemCategory.findMany({
+  const categories = await db.query.menuItemCategories.findMany({
     columns: {
       id: true,
       name: true,

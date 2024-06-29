@@ -1,0 +1,1 @@
+ALTER TABLE "supplements" ADD COLUMN "categoryId" integer;
