@@ -61,6 +61,7 @@ export function SupplementDialog({
   onCancel?: () => void;
   children?: React.ReactNode;
 }) {
+  const [localOpen, setLocalOpen] = useState(false);
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -95,7 +96,7 @@ export function SupplementDialog({
       } else {
         const res = await fetch("/api/supplements", {
           method: "POST",
-          body: JSON.stringify({ ...values, categoryId: parseInt(params.id) }),
+          body: JSON.stringify({ ...values, categoryId: +params.id }),
           headers: {
             "Content-Type": "application/json",
           },
@@ -108,11 +109,11 @@ export function SupplementDialog({
         }
       }
       setLoading(false);
-      router.refresh();
+      await router.refresh();
       if (typeof onCancel === "function") {
         onCancel();
-      }else {
-        // figure out a way to close the dialog 
+      } else {
+        setLocalOpen(false);
       }
     } catch (err) {
       setLoading(false);
@@ -123,8 +124,17 @@ export function SupplementDialog({
     }
   };
   return (
-    <Dialog open={open}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open !== undefined ? open : localOpen}>
+      <DialogTrigger
+        onClick={() => {
+          if (typeof open === "undefined") {
+            setLocalOpen(true);
+          }
+        }}
+        asChild
+      >
+        {children}
+      </DialogTrigger>
       <DialogContent cancelButtonHidden className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -182,12 +192,23 @@ export function SupplementDialog({
               )}
             />
             <DialogFooter>
-              <DialogClose onClick={onCancel} asChild>
-                <Button type="button" variant="secondary">
+              <DialogClose
+                onClick={() => {
+                  if (typeof onCancel === "function") {
+                    onCancel();
+                  } else {
+                    setLocalOpen(false);
+                  }
+                }}
+                asChild
+              >
+                <Button disabled={loading} type="button" variant="secondary">
                   Annuler
                 </Button>
               </DialogClose>
-              <Button type="submit">Sauvegarder</Button>
+              <Button disabled={loading} type="submit">
+                Sauvegarder
+              </Button>
             </DialogFooter>
           </form>
         </Form>

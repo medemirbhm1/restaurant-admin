@@ -22,11 +22,7 @@ import { Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DeleteAction from "./DeleteAction";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  type menuItemCategory,
-  supplements,
-  type supplement,
-} from "@/lib/schema";
+import { type menuItemCategory, type supplement } from "@/lib/schema";
 import { SupplementDialog } from "./SupplementDialog";
 import SupplementAction from "./SupplementAction";
 
@@ -55,7 +51,7 @@ function CategoryForm({
 }: {
   initialData?: menuItemCategory | null;
   id: string;
-  supplements: supplement[];
+  supplements: supplement[] | null;
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -67,19 +63,21 @@ function CategoryForm({
           name: initialData.name,
           description: initialData.description,
           imgUrl: initialData.imgUrl,
-          supplements: initialData.supplements.map(
-            (supplement) => supplement.id
-          ),
+          supplements: initialData.supplements
+            .filter((supplement) => supplement.enabled)
+            .map((supplement) => supplement.id),
         }
       : {
           name: "",
           description: "",
+          supplements: [],
         },
   });
 
   async function onSubmit(values: CategoryFormValues) {
     try {
       setLoading(true);
+
       if (initialData) {
         const res = await fetch(`/api/categories/${id}`, {
           method: "PATCH",
@@ -88,12 +86,12 @@ function CategoryForm({
             "Content-Type": "application/json",
           },
         });
-        toast({
-          description: "Catégorie modifiée avec succès",
-        });
         if (!res.ok) {
           throw new Error();
         }
+        toast({
+          description: "Catégorie modifiée avec succès",
+        });
       } else {
         const res = await fetch("/api/categories", {
           method: "POST",
@@ -102,16 +100,17 @@ function CategoryForm({
             "Content-Type": "application/json",
           },
         });
-        toast({
-          description: "Catégorie ajoutée avec succès",
-        });
         if (!res.ok) {
           throw new Error();
         }
+        toast({
+          description: "Catégorie ajoutée avec succès",
+        });
+        const { id } = await res.json();
+        router.push(`/dashboard/categories/${id}`);
       }
       form.reset();
       setLoading(false);
-      await router.push("/dashboard/categories");
       router.refresh();
     } catch (err) {
       setLoading(false);
@@ -189,63 +188,69 @@ function CategoryForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="supplements"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <div className="flex justify-between">
-                      <FormLabel className="text-base">Suppléments</FormLabel>
-                      <SupplementDialog>
-                        <Button size="icon">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </SupplementDialog>
+            {supplements ? (
+              <FormField
+                control={form.control}
+                name="supplements"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <div className="flex justify-between">
+                        <FormLabel className="text-base">Suppléments</FormLabel>
+                        <SupplementDialog>
+                          <Button size="icon">
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </SupplementDialog>
+                      </div>
+                      <FormDescription>
+                        Sélectionnez les suppléments disponibles pour cette
+                        catégorie
+                      </FormDescription>
                     </div>
-                    <FormDescription>
-                      Sélectionnez les suppléments disponibles pour cette
-                      catégorie
-                    </FormDescription>
-                  </div>
-                  {supplements.map((item) => (
-                    <FormField
-                      key={item.id}
-                      control={form.control}
-                      name="supplements"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={item.id}
-                            className="flex flex-row items-center space-x-3 space-y-0"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.name}
-                            </FormLabel>
-                            <SupplementAction supplementData={item} />
-                          </FormItem>
-                        );
-                      }}
-                    />
-                  ))}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    {supplements.map((item) => (
+                      <FormField
+                        key={item.id}
+                        control={form.control}
+                        name="supplements"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={item.id}
+                              className="flex flex-row items-center space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  defaultChecked={item.enabled}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...field.value,
+                                          item.id,
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== item.id
+                                          )
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {item.name}
+                              </FormLabel>
+                              <SupplementAction supplementData={item} />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    ))}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
+
             <Button type="submit" disabled={loading || !form.formState.isDirty}>
               {initialData ? "Modifier" : "Ajouter"}
             </Button>

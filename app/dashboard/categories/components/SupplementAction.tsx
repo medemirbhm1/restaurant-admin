@@ -11,9 +11,10 @@ import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useState } from "react";
 import { SupplementDialog } from "./SupplementDialog";
 import { supplement } from "@/lib/schema";
+import SupplementDeleteDialog from "./SupplementDeleteDialog";
 
 function SupplementAction({ supplementData }: { supplementData: supplement }) {
-  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   return (
     <>
@@ -31,7 +32,7 @@ function SupplementAction({ supplementData }: { supplementData: supplement }) {
             modifier
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => setDeleteAlertOpen(true)}>
+          <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
             <Trash className="w-4 h-4 mr-2 inline" />
             supprimer
           </DropdownMenuItem>
@@ -42,11 +43,11 @@ function SupplementAction({ supplementData }: { supplementData: supplement }) {
         open={editDialogOpen}
         onCancel={() => setEditDialogOpen(false)}
       />
-      {/* <DeleteAction
-        id={data.id.toString()}
-        open={deleteAlertOpen}
-        onCancel={() => setDeleteAlertOpen(false)}
-      /> */}
+      <SupplementDeleteDialog
+        id={supplementData.id.toString()}
+        open={deleteDialogOpen}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
+  boolean,
   integer,
   pgEnum,
   pgTable,
@@ -67,6 +68,7 @@ export const supplements = pgTable("supplements", {
   price: integer("price").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   categoryId: integer("categoryId"),
+  enabled: boolean("enabled").default(true).notNull(),
 });
 export type supplement = InferSelectModel<typeof supplements>;
 
@@ -75,7 +77,7 @@ export const supplementsRelations = relations(supplements, ({ one }) => ({
     fields: [supplements.categoryId],
     references: [menuItemCategories.id],
   }),
-  
+
   ordersToMenuItemsToSupplements: one(ordersToMenuItemsToSupplements),
 }));
 export const menuItemCategories = pgTable("menuItemCategories", {

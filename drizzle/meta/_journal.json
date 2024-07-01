@@ -50,6 +50,13 @@
       "when": 1719602620589,
       "tag": "0006_bored_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1719745661756,
+      "tag": "0007_large_doomsday",
+      "breakpoints": true
     }
   ]
 }

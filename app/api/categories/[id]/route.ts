@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { menuItemCategory } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { menuItemCategories, supplements } from "@/lib/schema";
+import { eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 export async function DELETE(
@@ -17,7 +17,7 @@ export async function DELETE(
     if (isNaN(idInt)) {
       throw new Error("Invalid ID");
     }
-    await db.delete(menuItemCategory).where(eq(menuItemCategory.id, idInt));
+    await db.delete(menuItemCategories).where(eq(menuItemCategories.id, idInt));
     return Response.json(
       {
         ok: true,
@@ -51,21 +51,37 @@ export async function PATCH(
     if (isNaN(idInt)) {
       throw new Error("Invalid ID");
     }
-    const {
-      name,
-      description,
-      imgUrl,
-    }: { name: string; description: string; imgUrl: string } =
-      await request.json();
-
-    await db
-      .update(menuItemCategory)
-      .set({
-        name,
-        description,
-        imgUrl,
-      })
-      .where(eq(menuItemCategory.id, idInt));
+    const data: {
+      name: string;
+      description: string;
+      imgUrl: string;
+      supplements: number[];
+    } = await request.json();
+    const { name, description, imgUrl } = data;
+    let categorySupplements;
+    if (data.supplements.length !== 0) {
+      categorySupplements = data.supplements.join(", ");
+    } else {
+      categorySupplements = "NULL";
+    }
+    await Promise.all([
+      db
+        .update(menuItemCategories)
+        .set({
+          name,
+          description,
+          imgUrl,
+        })
+        .where(eq(menuItemCategories.id, idInt)),
+      db.execute(sql`
+        UPDATE supplements
+        SET "enabled" = CASE
+          WHEN "id" IN (${sql.raw(categorySupplements)}) THEN TRUE
+          ELSE FALSE
+        END
+        WHERE "categoryId" = ${idInt};
+        `),
+    ]);
     return Response.json(
       {
         ok: true,

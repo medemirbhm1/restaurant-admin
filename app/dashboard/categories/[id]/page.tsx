@@ -2,7 +2,7 @@ import React from "react";
 import CategoryForm from "../components/CategoryForm";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { menuItemCategories } from "@/lib/schema";
+import { menuItemCategories, supplements } from "@/lib/schema";
 import { redirect } from "next/navigation";
 
 async function page({
@@ -13,6 +13,7 @@ async function page({
   };
 }) {
   let category = null;
+  let categorySupplements = null;
   const idInt = parseInt(id);
   if (!isNaN(idInt)) {
     category = await db.query.menuItemCategories.findFirst({
@@ -30,11 +31,17 @@ async function page({
     if (!category) {
       return redirect("/dashboard/categories");
     }
+    categorySupplements = await db.query.supplements.findMany({
+      where: eq(supplements.categoryId, idInt),
+    });
   }
-  const supplements = await db.query.supplements.findMany();
   return (
     <div>
-      <CategoryForm initialData={category} id={id} supplements={supplements} />
+      <CategoryForm
+        initialData={category}
+        id={id}
+        supplements={categorySupplements}
+      />
     </div>
   );
 }

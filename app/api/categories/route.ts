@@ -1,6 +1,6 @@
 import { isAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { menuItemCategory } from "@/lib/schema";
+import { menuItemCategories } from "@/lib/schema";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
@@ -14,14 +14,18 @@ export async function POST(request: Request) {
       throw new Error("Missing fields");
     }
     const { name, description, imgUrl } = body;
-    const category = await db.insert(menuItemCategory).values({
-      name,
-      description,
-      imgUrl,
-    });
+    const category = await db
+      .insert(menuItemCategories)
+      .values({
+        name,
+        description,
+        imgUrl,
+      })
+      .returning();
     return Response.json(
       {
         ok: true,
+        id: category[0].id,
       },
       {
         status: 200,

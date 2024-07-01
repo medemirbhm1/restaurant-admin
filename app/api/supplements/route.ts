@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     if (!(await isAdmin(token?.value))) {
       throw new Error("Unauthorized");
     }
-    if (!body?.name || !body?.price || !body?.categoryId) {
+    if (!body?.name || !body?.categoryId || isNaN(parseInt(body?.price))) {
       throw new Error("Missing fields");
     }
     const { name, price, categoryId } = body;
