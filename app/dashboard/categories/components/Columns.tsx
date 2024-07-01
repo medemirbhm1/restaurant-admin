@@ -19,7 +19,7 @@ export const columns: ColumnDef<CategoryColumn>[] = [
         src={row.original.imgUrl}
         width={100}
         height={100}
-        className="object-cover rounded"
+        className="object-cover rounded w-28 h-16"
         alt=""
       />
     ),

@@ -51,6 +51,8 @@ export const menuItems = pgTable("menuItems", {
   price: integer("price").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   categoryId: integer("categoryId"),
+  imgUrl: text("imgUrl").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
 });
 
 export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
