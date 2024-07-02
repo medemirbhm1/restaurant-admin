@@ -57,6 +57,13 @@
       "when": 1719745661756,
       "tag": "0007_large_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1719962137184,
+      "tag": "0008_reflective_green_goblin",
+      "breakpoints": true
     }
   ]
 }

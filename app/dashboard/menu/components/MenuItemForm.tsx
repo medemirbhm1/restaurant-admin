@@ -9,7 +9,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,13 +24,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ImageUpload from "@/components/ImageUpload";
 import { useState } from "react";
-import { Plus, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DeleteAction from "./DeleteAction";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type menuItemCategory, type supplement } from "@/lib/schema";
-import { SupplementDialog } from "./SupplementDialog";
-import SupplementAction from "./SupplementAction";
+import { type menuItemCategory, type menuItem } from "@/lib/schema";
 
 export const creationFormSchema = z.object({
   name: z
@@ -40,44 +44,50 @@ export const creationFormSchema = z.object({
   imgUrl: z.string().min(1, {
     message: "L'image est obligatoire",
   }),
-  supplements: z.array(z.number()),
+  price: z.coerce
+    .number({
+      message: "Le prix doit être un nombre",
+    })
+    .min(0, {
+      message: "Prix non valide",
+    }),
+  enabled: z.boolean().optional(),
+  categoryId: z.coerce.number(),
 });
-type CategoryFormValues = z.infer<typeof creationFormSchema>;
+type MenuItemFormValues = z.infer<typeof creationFormSchema>;
 
 function CategoryForm({
   initialData,
   id,
-  supplements,
+  categories,
 }: {
-  initialData?: menuItemCategory | null;
+  initialData?: menuItem | null;
   id: string;
-  supplements: supplement[] | null;
+  categories: menuItemCategory[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const form = useForm<CategoryFormValues>({
+  const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(creationFormSchema),
     defaultValues: initialData
       ? {
           name: initialData.name,
           description: initialData.description,
           imgUrl: initialData.imgUrl,
-          supplements:
-            initialData.supplements &&
-            initialData.supplements
-              .filter((supplement) => supplement.enabled)
-              .map((supplement) => supplement.id),
+          price: initialData.price,
+          enabled: initialData.enabled,
+          categoryId: initialData.categoryId,
         }
       : undefined,
   });
 
-  async function onSubmit(values: CategoryFormValues) {
+  async function onSubmit(values: MenuItemFormValues) {
     try {
       setLoading(true);
 
       if (initialData) {
-        const res = await fetch(`/api/categories/${id}`, {
+        const res = await fetch(`/api/menuItems/${id}`, {
           method: "PATCH",
           body: JSON.stringify(values),
           headers: {
@@ -88,10 +98,10 @@ function CategoryForm({
           throw new Error();
         }
         toast({
-          description: "Catégorie modifiée avec succès",
+          description: "Element modifié avec succès",
         });
       } else {
-        const res = await fetch("/api/categories", {
+        const res = await fetch("/api/menuItems", {
           method: "POST",
           body: JSON.stringify(values),
           headers: {
@@ -102,10 +112,10 @@ function CategoryForm({
           throw new Error();
         }
         toast({
-          description: "Catégorie ajoutée avec succès",
+          description: "Element ajouté avec succès",
         });
         const { id } = await res.json();
-        router.push(`/dashboard/categories/${id}`);
+        router.push(`/dashboard/menu/${id}`);
       }
       form.reset();
       setLoading(false);
@@ -123,7 +133,7 @@ function CategoryForm({
     <div>
       <div className="flex items-center justify-between">
         <h1 className="font-bold text-5xl mb-10">
-          {initialData ? "Modifier la catégorie" : "Ajouter une catégorie"}
+          {initialData ? "Modifier l'élément" : "Ajouter un élément"}
         </h1>
         {initialData ? (
           <DeleteAction id={id}>
@@ -186,64 +196,78 @@ function CategoryForm({
                 </FormItem>
               )}
             />
-            {supplements ? (
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prix</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="10"
+                      type="number"
+                      disabled={loading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Catégorie</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category.id}
+                          value={category.id.toString()}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    La catégorie à laquelle appartient cet élément
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {initialData ? (
               <FormField
                 control={form.control}
-                name="supplements"
-                render={() => (
-                  <FormItem>
-                    <div className="mb-4">
-                      <div className="flex justify-between">
-                        <FormLabel className="text-base">Suppléments</FormLabel>
-                        <SupplementDialog>
-                          <Button size="icon">
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </SupplementDialog>
-                      </div>
+                name="enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        {field.value ? "Activé" : "Désactivé"}
+                      </FormLabel>
                       <FormDescription>
-                        Sélectionnez les suppléments disponibles pour cette
-                        catégorie
+                        Si désactivé, cet élément ne sera pas visible sur le
+                        site
                       </FormDescription>
                     </div>
-                    {supplements.map((item) => (
-                      <FormField
-                        key={item.id}
-                        control={form.control}
-                        name="supplements"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={item.id}
-                              className="flex flex-row items-center space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  defaultChecked={item.enabled}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          item.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== item.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {item.name}
-                              </FormLabel>
-                              <SupplementAction supplementData={item} />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                    <FormMessage />
                   </FormItem>
                 )}
               />

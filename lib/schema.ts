@@ -47,13 +47,14 @@ export const userRelations = relations(users, ({ many }) => ({
 export const menuItems = pgTable("menuItems", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 30 }).notNull(),
-  description: text("description"),
+  description: text("description").notNull(),
   price: integer("price").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  categoryId: integer("categoryId"),
+  categoryId: integer("categoryId").notNull(),
   imgUrl: text("imgUrl").notNull(),
   enabled: boolean("enabled").default(true).notNull(),
 });
+export type menuItem = InferSelectModel<typeof menuItems>;
 
 export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
   category: one(menuItemCategories, {
@@ -89,7 +90,7 @@ export const menuItemCategories = pgTable("menuItemCategories", {
   imgUrl: text("imgUrl").notNull(),
 });
 export type menuItemCategory = InferSelectModel<typeof menuItemCategories> & {
-  supplements: supplement[];
+  supplements?: supplement[];
 };
 
 export const menuItemCategoriesRelations = relations(

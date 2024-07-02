@@ -20,6 +20,7 @@ export async function POST(request: Request) {
       throw new Error("Missing fields");
     }
     const { name, description, imgUrl, price, categoryId } = body;
+    console.log(body);
     const menuItem = await db
       .insert(menuItems)
       .values({

@@ -1,6 +1,6 @@
 import { hashPassword } from "@/lib/auth/password";
 import { NewUser, insertUser, db } from "@/lib/db";
-import { menuItemCategory, supplements } from "@/lib/schema";
+import {  supplements } from "@/lib/schema";
 import { sql } from "drizzle-orm";
 
 const main = async () => {
