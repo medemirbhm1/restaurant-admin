@@ -35,6 +35,7 @@ async function page({
       where: eq(supplements.categoryId, idInt),
     });
   }
+  
   return (
     <div>
       <CategoryForm
