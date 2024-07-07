@@ -5,6 +5,8 @@ import { Separator } from "@radix-ui/react-dropdown-menu";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./Columns";
+import { menuItemCategories } from "@/lib/schema";
+import { asc } from "drizzle-orm";
 
 async function CategoryClient() {
   const categories = await db.query.menuItemCategories.findMany({
@@ -13,6 +15,7 @@ async function CategoryClient() {
       name: true,
       imgUrl: true,
     },
+    orderBy: [asc(menuItemCategories.id)],
   });
 
   return (

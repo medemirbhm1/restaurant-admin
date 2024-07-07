@@ -117,9 +117,8 @@ function CategoryForm({
         const { id } = await res.json();
         router.push(`/dashboard/menu/${id}`);
       }
-      form.reset();
+      await router.refresh();
       setLoading(false);
-      router.refresh();
     } catch (err) {
       setLoading(false);
       toast({
@@ -255,6 +254,7 @@ function CategoryForm({
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
+                        disabled={loading}
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />

@@ -88,6 +88,8 @@ export const menuItemCategories = pgTable("menuItemCategories", {
   name: varchar("name", { length: 30 }).notNull(),
   description: text("description").notNull(),
   imgUrl: text("imgUrl").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  shownInLandingPage: boolean("shownInLandingPage").default(true).notNull(),
 });
 export type menuItemCategory = InferSelectModel<typeof menuItemCategories> & {
   supplements?: supplement[];

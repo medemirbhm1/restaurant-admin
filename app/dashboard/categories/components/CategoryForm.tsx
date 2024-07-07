@@ -107,9 +107,8 @@ function CategoryForm({
         const { id } = await res.json();
         router.push(`/dashboard/categories/${id}`);
       }
-      form.reset();
+      await router.refresh();
       setLoading(false);
-      router.refresh();
     } catch (err) {
       setLoading(false);
       toast({

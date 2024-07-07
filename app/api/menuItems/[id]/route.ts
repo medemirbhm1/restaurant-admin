@@ -57,8 +57,19 @@ export async function PATCH(
       imgUrl: string;
       price: number;
       categoryId: number;
+      enabled: boolean;
     } = await request.json();
-    const { name, description, imgUrl, price, categoryId } = data;
+    if (
+      !data.name ||
+      !data.description ||
+      !data.imgUrl ||
+      !data.price ||
+      !data.categoryId ||
+      typeof data.enabled !== "boolean"
+    ) {
+      throw new Error("Missing required fields");
+    }
+    const { name, description, imgUrl, price, categoryId, enabled } = data;
     await db
       .update(menuItems)
       .set({
@@ -67,6 +78,7 @@ export async function PATCH(
         imgUrl,
         price,
         categoryId,
+        enabled,
       })
       .where(eq(menuItems.id, idInt));
     return Response.json(

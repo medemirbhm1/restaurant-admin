@@ -33,7 +33,7 @@ const CellAction: React.FC<cellActionProps> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() => {
-              router.push(`/dashboard/categories/${data.id}`);
+              router.push(`/dashboard/menu/${data.id}`);
             }}
           >
             <Edit className="w-4 h-4 mr-2" />
