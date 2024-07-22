@@ -1,4 +1,4 @@
-import { ChefHat } from "lucide-react";
+import { ChefHat, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import CartDialog from "./components/CartDialog";
@@ -20,26 +20,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       {children}
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">
-          &copy; 2024 Acme Restaurant. All rights reserved.
-        </p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link
-            href="#"
-            className="text-xs hover:underline underline-offset-4"
-            prefetch={false}
-          >
-            Terms of Service
-          </Link>
-          <Link
-            href="#"
-            className="text-xs hover:underline underline-offset-4"
-            prefetch={false}
-          >
-            Privacy Policy
-          </Link>
-        </nav>
+      <footer className="py-6 w-full px-4 md:px-6 border-t">
+        <div className="text-xs text-foreground font-medium flex justify-between flex-wrap gap-4">
+          <div>Arabesque</div>
+          <div className="flex gap-6 gap-y-2 flex-wrap">
+            <div className="flex items-center gap-1">
+              <Phone className="w-4 h-4" />
+              0656707748
+            </div>
+            <div className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              Rue Didouche Mourad, Mascara
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );
