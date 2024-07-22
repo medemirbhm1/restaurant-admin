@@ -1,4 +1,3 @@
-import { loginFormSchema } from "@/app/login/page";
 import { createToken } from "@/lib/auth/token";
 import { comparePassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";

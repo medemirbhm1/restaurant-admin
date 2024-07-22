@@ -1,4 +1,4 @@
-import { InferSelectModel, relations } from "drizzle-orm";
+import { InferSelectModel, or, relations } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -24,6 +24,8 @@ export const ordersStatusEnum = pgEnum("orderStatus", [
   "cancelled",
 ]);
 
+export const ordersType = pgEnum("orderType", ["delivery", "pickup"]);
+
 export const users = pgTable(
   "users",
   {
@@ -40,9 +42,6 @@ export const users = pgTable(
     uniqueIdx: uniqueIndex("uniqueIdx").on(user.id),
   })
 );
-export const userRelations = relations(users, ({ many }) => ({
-  orders: many(orders),
-}));
 
 export const menuItems = pgTable("menuItems", {
   id: serial("id").primaryKey(),
@@ -75,13 +74,12 @@ export const supplements = pgTable("supplements", {
 });
 export type supplement = InferSelectModel<typeof supplements>;
 
-export const supplementsRelations = relations(supplements, ({ one }) => ({
+export const supplementsRelations = relations(supplements, ({ one, many }) => ({
   category: one(menuItemCategories, {
     fields: [supplements.categoryId],
     references: [menuItemCategories.id],
   }),
-
-  ordersToMenuItemsToSupplements: one(ordersToMenuItemsToSupplements),
+  ordersToMenuItemsToSupplements: many(ordersToMenuItemsToSupplements),
 }));
 export const menuItemCategories = pgTable("menuItemCategories", {
   id: serial("id").primaryKey(),
@@ -105,42 +103,35 @@ export const menuItemCategoriesRelations = relations(
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  userId: integer("userId").notNull(),
+  clientFullName: varchar("clientFullName", { length: 50 }).notNull(),
+  clientPhone: varchar("clientPhone", { length: 20 }).notNull(),
+  address: text("address"),
   status: ordersStatusEnum("status").notNull(),
+  type: ordersType("type").notNull(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  number: integer("number").notNull(),
 });
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
-  user: one(users, {
-    fields: [orders.userId],
-    references: [users.id],
-  }),
   ordersToMenuItems: many(ordersToMenuItems),
   ordersToMenuItemsToSupplements: many(ordersToMenuItemsToSupplements),
 }));
 
-export const ordersToMenuItems = pgTable(
-  "ordersToMenuItems",
-  {
-    orderId: integer("orderId")
-      .notNull()
-      .references(() => orders.id),
-    menuItemId: integer("menuItemId")
-      .notNull()
-      .references(() => menuItems.id),
-    quantity: integer("number"),
-  },
-  (t) => ({
-    pk: primaryKey({
-      columns: [t.orderId, t.menuItemId],
-    }),
-  })
-);
+export const ordersToMenuItems = pgTable("ordersToMenuItems", {
+  id: serial("id").primaryKey(),
+  orderId: integer("orderId")
+    .notNull()
+    .references(() => orders.id),
+  menuItemId: integer("menuItemId")
+    .notNull()
+    .references(() => menuItems.id),
+  quantity: integer("number"),
+});
 
 export const ordersToMenuItemsRelations = relations(
   ordersToMenuItems,
-  ({ one }) => ({
+  ({ one, many }) => ({
     order: one(orders, {
       fields: [ordersToMenuItems.orderId],
       references: [orders.id],
@@ -149,40 +140,25 @@ export const ordersToMenuItemsRelations = relations(
       fields: [ordersToMenuItems.menuItemId],
       references: [menuItems.id],
     }),
+    ordersToMenuItemsToSupplements: many(ordersToMenuItemsToSupplements),
   })
 );
 
 export const ordersToMenuItemsToSupplements = pgTable(
   "ordersToMenuItemsToSupplements",
   {
-    orderId: integer("orderId")
-      .notNull()
-      .references(() => orders.id),
-    menuItemId: integer("menuItemId")
-      .notNull()
-      .references(() => menuItems.id),
-    supplementId: integer("supplementId")
-      .notNull()
-      .references(() => supplements.id),
-    quantity: integer("number"),
-  },
-  (t) => ({
-    pk: primaryKey({
-      columns: [t.orderId, t.menuItemId, t.supplementId],
-    }),
-  })
+    id: serial("id").primaryKey(),
+    orderToMenuItemId: integer("orderToMenuItemId").notNull(),
+    supplementId: integer("supplementId").notNull(),
+  }
 );
 
 export const ordersToMenuItemsToSupplementsRelations = relations(
   ordersToMenuItemsToSupplements,
   ({ one }) => ({
-    order: one(orders, {
-      fields: [ordersToMenuItemsToSupplements.orderId],
-      references: [orders.id],
-    }),
-    menuItem: one(menuItems, {
-      fields: [ordersToMenuItemsToSupplements.menuItemId],
-      references: [menuItems.id],
+    orderToMenuItem: one(ordersToMenuItems, {
+      fields: [ordersToMenuItemsToSupplements.orderToMenuItemId],
+      references: [ordersToMenuItems.id],
     }),
     supplement: one(supplements, {
       fields: [ordersToMenuItemsToSupplements.supplementId],
@@ -190,3 +166,12 @@ export const ordersToMenuItemsToSupplementsRelations = relations(
     }),
   })
 );
+
+export const reservations = pgTable("reservations", {
+  id: serial("id").primaryKey(),
+  placesNb: integer("placesNb").notNull(),
+  dateTime: timestamp("dateTime").notNull(),
+  notes: text("notes"),
+  fullName: varchar("fullName", { length: 50 }).notNull(),
+  phone: integer("phone").notNull(),
+});

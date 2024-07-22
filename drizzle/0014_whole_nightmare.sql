@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "number" integer NOT NULL;

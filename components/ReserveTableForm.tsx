@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { TimePicker } from "./ui/TimePicker";
@@ -21,6 +21,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
+import { Textarea } from "./ui/textarea";
+import { useToast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export const creationFormSchema = z.object({
   fullName: z.string({
@@ -30,20 +33,53 @@ export const creationFormSchema = z.object({
   placesNb: z.coerce.number().int().min(2, {
     message: "Le nombre de places doit être supérieur à 2",
   }),
-  date: z.date(),
+  dateTime: z.date(),
   notes: z.string(),
 });
 
 type ReservationFormValues = z.infer<typeof creationFormSchema>;
 
 function ReserveTableForm() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const form = useForm<ReservationFormValues>({
     resolver: zodResolver(creationFormSchema),
+    defaultValues: {
+      fullName: "",
+      phone: 0,
+      placesNb: 2,
+      dateTime: new Date(),
+      notes: "",
+    },
   });
-  const onSubmit = async (values: ReservationFormValues) => {
-    console.log(values);
-  };
+  async function onSubmit(values: ReservationFormValues, e: any) {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Une erreur est survenue");
+      }
+      form.reset();
+      toast({
+        description: "Votre réservation a été enregistrée",
+      });
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <Card>
       <CardContent className="p-6">
@@ -54,7 +90,7 @@ function ReserveTableForm() {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Votre nom </FormLabel>
+                  <FormLabel>Votre nom complet</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="john doe"
@@ -99,23 +135,24 @@ function ReserveTableForm() {
             />
             <FormField
               control={form.control}
-              name="date"
+              name="dateTime"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-left">DateTime</FormLabel>
+                  <FormLabel className="text-left">Date</FormLabel>
                   <Popover>
                     <FormControl>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
+                          type="button"
                           className={cn(
-                            "w-[280px] justify-start text-left font-normal",
+                            "justify-start text-left font-normal w-full",
                             !field.value && "text-muted-foreground"
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
-                            format(field.value, "PPP HH:mm:ss")
+                            format(field.value, "PPP HH:mm")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -128,19 +165,41 @@ function ReserveTableForm() {
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
+                        disabled={(date) => date < new Date()}
                       />
                       <div className="p-3 border-t border-border">
                         <TimePicker
                           setDate={field.onChange}
                           date={field.value}
                         />
-                        // next step: remove seconds from the time picker
                       </div>
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Si vous avez des notes à ajouter..."
+                      className="resize-none"
+                      disabled={loading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">
+              Envoyer
+            </Button>
           </form>
         </Form>
       </CardContent>

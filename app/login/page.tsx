@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export const loginFormSchema = z.object({
+ const loginFormSchema = z.object({
   username: z
     .string()
     .min(2, {
