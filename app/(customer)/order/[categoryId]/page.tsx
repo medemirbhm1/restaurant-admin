@@ -58,7 +58,10 @@ export default async function Page({
               className="rounded-lg bg-background pl-8 w-full"
             />
           </div>
-          <div className="mt-4 pb-4 flex gap-2 items-center overflow-x-auto lg:flex-wrap">
+          <div
+            className="mt-4 pb-4 flex gap-2 items-center overflow-x-auto lg:flex-wrap"
+            id="categoriesSwiper"
+          >
             {categories.map((category) => (
               <Link
                 key={category.id}
