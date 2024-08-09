@@ -18,12 +18,6 @@ async function page({
   if (!isNaN(idInt)) {
     category = await db.query.menuItemCategories.findFirst({
       where: eq(menuItemCategories.id, idInt),
-      columns: {
-        name: true,
-        description: true,
-        imgUrl: true,
-        id: true,
-      },
       with: {
         supplements: true,
       },
@@ -35,7 +29,7 @@ async function page({
       where: eq(supplements.categoryId, idInt),
     });
   }
-  
+
   return (
     <div>
       <CategoryForm

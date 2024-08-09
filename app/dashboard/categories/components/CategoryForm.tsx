@@ -40,7 +40,7 @@ export const creationFormSchema = z.object({
   imgUrl: z.string().min(1, {
     message: "L'image est obligatoire",
   }),
-  supplements: z.array(z.number()),
+  supplements: z.array(z.number()).optional(),
 });
 type CategoryFormValues = z.infer<typeof creationFormSchema>;
 
