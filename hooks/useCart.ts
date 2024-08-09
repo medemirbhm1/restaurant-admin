@@ -6,7 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 
 interface CartStore {
   items: OrderItem[];
-  addItem: (item: menuItem, supplements: cartSupplement[]) => void;
+  addItem: (
+    item: menuItem,
+    supplements: cartSupplement[],
+    quantity: number
+  ) => void;
   removeItem: (uuid: string) => void;
   removeAll: () => void;
   increaseQunatity: (uuid: string) => void;
@@ -17,11 +21,15 @@ const useCart = create(
   persist<CartStore>(
     (set, get) => ({
       items: [],
-      addItem: (item: menuItem, supplements: cartSupplement[]) => {
+      addItem: (
+        item: menuItem,
+        supplements: cartSupplement[],
+        quantity: number
+      ) => {
         const currentItems = get().items;
         const uuid = uuidv4();
         set({
-          items: [...currentItems, { ...item, quantity: 1, supplements, uuid }],
+          items: [...currentItems, { ...item, quantity, supplements, uuid }],
         });
       },
       removeItem: (uuid: string) => {

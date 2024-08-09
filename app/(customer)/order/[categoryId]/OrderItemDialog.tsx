@@ -28,11 +28,10 @@ import { menuItem, supplement } from "@/lib/schema";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import useCart from "@/hooks/useCart";
+import { MinusIcon, PlusIcon } from "lucide-react";
+import { set } from "date-fns";
 
 const OrderItemFormSchema = z.object({
-  quantity: z.coerce.number({
-    message: "La quantité est invalide",
-  }),
   supplements: z.array(
     z.object({
       id: z.number(),
@@ -53,25 +52,28 @@ export function OrderItemDialog({
   menuItem: menuItem;
 }) {
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState<number>(1);
   const cart = useCart();
   const [localOpen, setLocalOpen] = useState(false);
   const { toast } = useToast();
   const form = useForm<OrderItemFormValues>({
     resolver: zodResolver(OrderItemFormSchema),
     defaultValues: {
-      quantity: 1,
       supplements: [],
     },
   });
 
   const onSubmit = async (values: OrderItemFormValues) => {
     setLoading(true);
-    cart.addItem(menuItem, values.supplements);
+    cart.addItem(menuItem, values.supplements, quantity);
     toast({
       title: "Ajouté au panier",
       description: "L' élément a été ajouté à votre panier",
     });
     setLocalOpen(false);
+    setLoading(false);
+    setQuantity(1);
+    form.reset();
   };
 
   return (
@@ -94,24 +96,27 @@ export function OrderItemDialog({
             }}
             className="space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Quantité</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="1"
-                      disabled={loading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="">
+              <FormLabel className="text-base">Quantité</FormLabel>
+              <div className="flex justify-center items-center gap-4 font-bold text-lg">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={quantity === 1}
+                  onClick={() => setQuantity((old) => old - 1)}
+                >
+                  <MinusIcon className="w-6 h-6 " />
+                </Button>
+                {quantity}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setQuantity((old) => old + 1)}
+                >
+                  <PlusIcon className="w-6 h-6 " />
+                </Button>
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="supplements"
@@ -173,13 +178,13 @@ export function OrderItemDialog({
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter >
               <DialogClose onClick={() => setLocalOpen(false)} asChild>
                 <Button disabled={loading} type="button" variant="secondary">
                   Annuler
                 </Button>
               </DialogClose>
-              <Button disabled={loading} type="submit">
+              <Button disabled={loading} type="submit" className="mb-2">
                 Ajouter
               </Button>
             </DialogFooter>

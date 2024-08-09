@@ -20,6 +20,7 @@ export const userTypeEnum = pgEnum("userType", [
 
 export const ordersStatusEnum = pgEnum("orderStatus", [
   "pending",
+  "ready",
   "completed",
   "cancelled",
 ]);
@@ -65,7 +66,7 @@ export const menuItemsRelations = relations(menuItems, ({ one, many }) => ({
 }));
 
 export const supplements = pgTable("supplements", {
-  id: serial("id").primaryKey(),
+  id: serial("id").primaryKey().unique(),
   name: varchar("name", { length: 30 }).notNull(),
   price: integer("price").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -113,6 +114,8 @@ export const orders = pgTable("orders", {
   number: integer("number").notNull(),
 });
 
+export type order = InferSelectModel<typeof orders>;
+
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   ordersToMenuItems: many(ordersToMenuItems),
   ordersToMenuItemsToSupplements: many(ordersToMenuItemsToSupplements),
@@ -122,11 +125,15 @@ export const ordersToMenuItems = pgTable("ordersToMenuItems", {
   id: serial("id").primaryKey(),
   orderId: integer("orderId")
     .notNull()
-    .references(() => orders.id),
+    .references(() => orders.id, {
+      onDelete: "cascade",
+    }),
   menuItemId: integer("menuItemId")
     .notNull()
-    .references(() => menuItems.id),
-  quantity: integer("number"),
+    .references(() => menuItems.id, {
+      onDelete: "restrict",
+    }),
+  quantity: integer("quantity"),
 });
 
 export const ordersToMenuItemsRelations = relations(
@@ -148,8 +155,16 @@ export const ordersToMenuItemsToSupplements = pgTable(
   "ordersToMenuItemsToSupplements",
   {
     id: serial("id").primaryKey(),
-    orderToMenuItemId: integer("orderToMenuItemId").notNull(),
-    supplementId: integer("supplementId").notNull(),
+    orderToMenuItemId: integer("orderToMenuItemId")
+      .notNull()
+      .references(() => ordersToMenuItems.id, {
+        onDelete: "cascade",
+      }),
+    supplementId: integer("supplementId")
+      .notNull()
+      .references(() => supplements.id, {
+        onDelete: "restrict",
+      }),
   }
 );
 

@@ -5,13 +5,51 @@ import {
   ordersToMenuItems,
   ordersToMenuItemsToSupplements,
 } from "@/lib/schema";
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
+
+export async function GET(request: Request) {
+  try {
+    const token = cookies().get("token");
+    if (!(await isAdmin(token?.value))) {
+      throw new Error("Unauthorized");
+    }
+    const url = new URL(request.url);
+    const searchParams = new URLSearchParams(url.searchParams);
+    const page = parseInt(searchParams.get("page") || "1");
+    const queryRes = await db
+      .select()
+      .from(orders)
+      .limit(11)
+      .offset((page - 1) * 10)
+      .orderBy(desc(orders.id))
+      .execute();
+    const next = queryRes.length === 11;
+    return Response.json(
+      {
+        orders: queryRes.slice(0, 10),
+        next,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (err: any) {
+    console.log(err);
+    return Response.json(
+      {
+        error: err.message,
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-
     if (
       !body.clientFullName ||
       !body.clientPhone ||

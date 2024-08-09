@@ -1,1 +1,0 @@
-ALTER TABLE "supplements" ADD COLUMN "enabled" boolean DEFAULT true NOT NULL;

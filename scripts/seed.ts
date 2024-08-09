@@ -5,13 +5,23 @@ import {
   ordersToMenuItems,
   ordersToMenuItemsToSupplements,
   supplements,
+  users,
 } from "@/lib/schema";
 import { sql } from "drizzle-orm";
 
 const main = async () => {
-  await db.delete(ordersToMenuItemsToSupplements).where(sql`1 = 1`);
-  await db.delete(ordersToMenuItems).where(sql`1 = 1`);
-  await db.delete(orders).where(sql`1 = 1`);
+ 
+  const password = await hashPassword("admin");
+
+  await db.insert(users).values({
+    firstname: "admin",
+    lastname: "admin",
+    username: "admin",
+    phone: "1234567890",
+    type: "superadmin",
+    password,
+  })
+
   process.exit();
 };
 

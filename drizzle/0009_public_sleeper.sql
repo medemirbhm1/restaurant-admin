@@ -1,2 +1,0 @@
-ALTER TABLE "menuItemCategories" ADD COLUMN "enabled" boolean DEFAULT true NOT NULL;--> statement-breakpoint
-ALTER TABLE "menuItemCategories" ADD COLUMN "shownInLandingPage" boolean DEFAULT true NOT NULL;

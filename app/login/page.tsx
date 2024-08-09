@@ -19,10 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
- const loginFormSchema = z.object({
+const loginFormSchema = z.object({
   username: z
     .string()
     .min(2, {
@@ -36,6 +37,7 @@ import { z } from "zod";
 });
 
 export default function Login() {
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -46,6 +48,7 @@ export default function Login() {
   const router = useRouter();
   async function onSubmit(values: z.infer<typeof loginFormSchema>) {
     try {
+      setLoading(true);
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -58,6 +61,8 @@ export default function Login() {
       form.setError("password", {
         message: "Nom d'utilisateur ou mot de passe incorrect",
       });
+    } finally {
+      setLoading(false);
     }
   }
   return (
@@ -73,6 +78,7 @@ export default function Login() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="username"
                 render={({ field }) => (
@@ -86,6 +92,7 @@ export default function Login() {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="password"
                 render={({ field }) => (
@@ -98,7 +105,7 @@ export default function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={loading}>
                 Se connecter
               </Button>
             </form>

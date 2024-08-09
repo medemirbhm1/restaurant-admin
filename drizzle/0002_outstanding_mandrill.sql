@@ -1,1 +1,0 @@
-ALTER TABLE "menuItemCategory" ADD COLUMN "imgUrl" text;
