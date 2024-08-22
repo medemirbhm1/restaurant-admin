@@ -18,7 +18,7 @@ import {
   Trash,
   XIcon,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import {  useRouter } from "next/navigation";
 import DeleteAction from "./DeleteAction";
 import EditStateAction from "./EditStateAction";
 import { order } from "@/lib/schema";

@@ -2,6 +2,10 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { getOrder } from "@/lib/data-access";
 import Image from "next/image";
+import DeleteAction from "../components/DeleteAction";
+// import EditStateAction from "../components/EditStateAction";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 
 async function page({
   params: { id },
@@ -22,9 +26,21 @@ async function page({
     <div className="container">
       <div className="flex items-center justify-between">
         <h1 className="font-bold text-5xl mb-10">Commande N°{order.id}</h1>
-        {/* Actions will be here */}
+        <div>
+          <DeleteAction id={order.id.toString()}>
+            <Button variant="destructive">
+              Supprimer <Trash className="w-4 h-4 ml-2" />
+            </Button>
+          </DeleteAction>
+        </div>
       </div>
       <div className="grid grid-cols-3 gap-10 justify-between">
+        <div>
+          <span className="text-lg font-semibold mr-2 inline-block">
+            Identifiant:
+          </span>
+          <span>{order.id}</span>
+        </div>
         <div>
           <span className="text-lg font-semibold mr-2 inline-block">Nom:</span>
           <span>{order.clientFullName}</span>
@@ -112,13 +128,18 @@ async function page({
               alt=""
             />
             <div>
-              <p className="font-semibold text-lg">{orderItem.menuItem.name}</p>
+              <p className="font-semibold text-lg">
+                {orderItem.menuItem.name} X {orderItem.quantity}
+              </p>
               <p className="text-muted-foreground">
-                {orderItem.ordersToMenuItemsToSupplements
-                  .map(
-                    (orderItemSupplement) => orderItemSupplement.supplement.name
-                  )
-                  .join(", ")}
+                {orderItem.ordersToMenuItemsToSupplements.length
+                  ? orderItem.ordersToMenuItemsToSupplements
+                      .map(
+                        (orderItemSupplement) =>
+                          orderItemSupplement.supplement.name
+                      )
+                      .join(", ")
+                  : "Sans suppléments"}
               </p>
               <p>
                 {(orderItem.menuItem.price +

@@ -80,7 +80,7 @@ export default async function Page({
             {items.map((menuItem) => (
               <Card
                 key={menuItem.id}
-                className="relative rounded-lg overflow-hidden shadow-lg transition-all hover:shadow-xl"
+                className="relative flex flex-col rounded-lg overflow-hidden shadow-lg transition-all hover:shadow-xl"
               >
                 <Image
                   src={menuItem.imgUrl}
@@ -88,14 +88,12 @@ export default async function Page({
                   fill
                   className="w-full !h-60 object-cover"
                 />
-                <div className="p-6 bg-background mt-60">
-                  <div className="flex items-center justify-between gap-1 flex-wrap">
-                    <div>
-                      <h3 className="text-xl font-bold">{menuItem.name}</h3>
-                      <p className="text-muted-foreground text-sm">
-                        {menuItem.description}
-                      </p>
-                    </div>
+                <div className="p-6 bg-background mt-60 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">{menuItem.name}</h3>
+                    <p className="text-muted-foreground text-sm">
+                      {menuItem.id === 2 && menuItem.description}
+                    </p>
                     <div className="text-2xl font-bold">
                       {menuItem.price} DA
                     </div>
