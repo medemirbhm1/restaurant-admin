@@ -133,7 +133,7 @@ export const ordersToMenuItems = pgTable("ordersToMenuItems", {
     .references(() => menuItems.id, {
       onDelete: "restrict",
     }),
-  quantity: integer("quantity"),
+  quantity: integer("quantity").notNull(),
 });
 
 export const ordersToMenuItemsRelations = relations(
