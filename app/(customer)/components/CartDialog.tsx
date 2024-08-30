@@ -95,6 +95,7 @@ export default function CartDialog() {
       const { orderNum } = await res.json();
       setOrderNumber(orderNum);
       setActiveStep(3);
+      
     } catch (error) {
     } finally {
       setLoading(false);
