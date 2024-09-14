@@ -3,8 +3,8 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface OrdersStore {
-  orders: order[];
-  addOrder: (order: order) => void;
+  orders: number[];
+  addOrder: (orderId: number) => void;
   removeOrder: (id: number) => void;
   removeAll: () => void;
 }
@@ -13,15 +13,15 @@ const useOrderHistory = create(
   persist<OrdersStore>(
     (set, get) => ({
       orders: [],
-      addOrder: (item) => {
+      addOrder: (orderId) => {
         const currentItems = get().orders;
         set({
-          orders: [...currentItems, item],
+          orders: [...currentItems, orderId],
         });
       },
       removeOrder: (id: number) => {
         set({
-          orders: [...get().orders.filter((order) => order.id !== id)],
+          orders: [...get().orders.filter((orderId) => orderId !== id)],
         });
       },
       removeAll: () => {
@@ -29,7 +29,7 @@ const useOrderHistory = create(
       },
     }),
     {
-      name: "cart-storage",
+      name: "order-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

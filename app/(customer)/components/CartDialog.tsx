@@ -40,6 +40,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import useOrderHistory from "@/hooks/useOrderHistory";
+import { order } from "@/lib/schema";
+import { OrderItem } from "@/types";
 
 const OrderFormSchema = z
   .object({
@@ -66,8 +69,9 @@ const OrderFormSchema = z
 type OrderFormValues = z.infer<typeof OrderFormSchema>;
 
 export default function CartDialog() {
-  const [loading, setLoading] = useState(false);
   const cart = useCart();
+  const orderHistory = useOrderHistory();
+  const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const form = useForm<OrderFormValues>({
@@ -92,10 +96,10 @@ export default function CartDialog() {
         throw new Error();
       }
       cart.removeAll();
-      const { orderNum } = await res.json();
-      setOrderNumber(orderNum);
+      const { orderId, orderNumber } = await res.json();
+      setOrderNumber(orderNumber);
       setActiveStep(3);
-      
+      orderHistory.addOrder(orderId);
     } catch (error) {
     } finally {
       setLoading(false);

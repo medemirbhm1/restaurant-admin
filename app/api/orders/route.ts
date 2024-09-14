@@ -5,21 +5,24 @@ import {
   ordersToMenuItems,
   ordersToMenuItemsToSupplements,
 } from "@/lib/schema";
-import { desc, sql } from "drizzle-orm";
+import { desc, inArray, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   try {
     const token = cookies().get("token");
-    if (!(await isAdmin(token?.value))) {
-      throw new Error("Unauthorized");
-    }
+
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
     const page = parseInt(searchParams.get("page") || "1");
+    const ids = searchParams.get("ids")?.split(",").map(Number);
+    if ((!ids || !ids.length) && !(await isAdmin(token?.value))) {
+      throw new Error("Unauthorized");
+    }
     const queryRes = await db
       .select()
       .from(orders)
+      .where(ids ? inArray(orders.id, ids) : undefined)
       .limit(11)
       .offset((page - 1) * 10)
       .orderBy(desc(orders.id))
@@ -102,25 +105,31 @@ export async function POST(request: Request) {
         id: orderItems[index].id,
       })
     );
-    await db.insert(ordersToMenuItemsToSupplements).values(
-      orderItemsToInsertWithId.flatMap(
-        (item: { id: number; supplements: number[] }) =>
-          item.supplements.map((supplementId) => ({
-            orderToMenuItemId: item.id,
-            supplementId,
-          }))
-      )
-    );
+    if (
+      orderItemsToInsertWithId.some((item: any) => item.supplements?.length)
+    ) {
+      await db.insert(ordersToMenuItemsToSupplements).values(
+        orderItemsToInsertWithId.flatMap(
+          (item: { id: number; supplements: number[] }) =>
+            item.supplements.map((supplementId) => ({
+              orderToMenuItemId: item.id,
+              supplementId,
+            }))
+        )
+      );
+    }
     return Response.json(
       {
         ok: true,
-        orderNum: order[0].number,
+        orderId: order[0].id,
+        orderNumber: order[0].number,
       },
       {
         status: 200,
       }
     );
   } catch (err: any) {
+    console.log(err);
     return Response.json(
       {
         error: err.message,
