@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import CellAction from "./CellAction";
 import { cn } from "@/lib/utils";
 import { order } from "@/lib/schema";
+import { OrderStates } from "@/lib/constants";
 
 export type OrderColumn = {
   id: number;
@@ -39,7 +40,7 @@ export const columns: ColumnDef<OrderColumn>[] = [
               : "bg-red-500"
           )}
         />
-        <span>{row.original.status}</span>
+        <span>{OrderStates[row.original.status]}</span>
       </div>
     ),
   },

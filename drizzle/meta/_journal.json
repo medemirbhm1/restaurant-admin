@@ -8,6 +8,27 @@
       "when": 1722984364644,
       "tag": "0000_loving_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1727120578859,
+      "tag": "0001_bizarre_redwing",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1727161061581,
+      "tag": "0002_lyrical_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1727161292590,
+      "tag": "0003_daffy_magneto",
+      "breakpoints": true
     }
   ]
 }

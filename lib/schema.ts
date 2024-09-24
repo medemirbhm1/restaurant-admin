@@ -1,10 +1,9 @@
-import { InferSelectModel, or, relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   boolean,
   integer,
   pgEnum,
   pgTable,
-  primaryKey,
   serial,
   text,
   timestamp,
@@ -21,6 +20,13 @@ export const userTypeEnum = pgEnum("userType", [
 export const ordersStatusEnum = pgEnum("orderStatus", [
   "pending",
   "ready",
+  "completed",
+  "cancelled",
+]);
+
+export const reservationStatusEnum = pgEnum("reservationStatus", [
+  "pending",
+  "confirmed",
   "completed",
   "cancelled",
 ]);
@@ -188,5 +194,10 @@ export const reservations = pgTable("reservations", {
   dateTime: timestamp("dateTime").notNull(),
   notes: text("notes"),
   fullName: varchar("fullName", { length: 50 }).notNull(),
-  phone: integer("phone").notNull(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  status: reservationStatusEnum("status").default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
+
+
+export type reservation = InferSelectModel<typeof reservations>;

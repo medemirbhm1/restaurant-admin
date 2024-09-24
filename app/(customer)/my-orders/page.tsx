@@ -4,6 +4,7 @@ import { OrderStates, OrderTypes } from "@/lib/constants";
 import { order } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { CheckIcon, ChefHatIcon, ClockIcon, XIcon } from "lucide-react";
 import React from "react";
 
 function Page() {
@@ -31,8 +32,20 @@ function Page() {
             {data.orders.map((order: order) => (
               <div
                 key={order.id}
-                className="border border-gray-200 rounded-3xl flex flex-col items-center py-20 px-4 text-center"
+                className="border relative border-gray-200 rounded-3xl flex flex-col items-center py-20 px-4 text-center"
               >
+                <div className="absolute top-4 right-4">
+                  {
+                    {
+                      pending: (
+                        <ClockIcon className="w-8 h-8 text-orange-500" />
+                      ),
+                      ready: <ChefHatIcon className="w-8 h-8 text-green-500" />,
+                      completed: <CheckIcon className="w-8 h-8 text-black" />,
+                      cancelled: <XIcon className="w-8 h-8 text-red-500" />,
+                    }[order.status]
+                  }
+                </div>
                 <p className="text-4xl font-bold">#N°{order.number}</p>
                 <p>{OrderTypes[order.type]}</p>
                 {order.type === "delivery" && <p>{order.address}</p>}
@@ -46,7 +59,7 @@ function Page() {
                     {
                       pending: "text-orange-500",
                       ready: "text-green-500",
-                      completed: "text-green-500",
+                      completed: "text-black",
                       cancelled: "text-red-500",
                     }[order.status]
                   )}

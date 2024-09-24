@@ -4,23 +4,19 @@ import {
   orders,
   ordersToMenuItems,
   ordersToMenuItemsToSupplements,
+  reservations,
   supplements,
   users,
 } from "@/lib/schema";
 import { sql } from "drizzle-orm";
 
 const main = async () => {
- 
   const password = await hashPassword("admin");
 
-  await db.insert(users).values({
-    firstname: "admin",
-    lastname: "admin",
-    username: "admin",
-    phone: "1234567890",
-    type: "superadmin",
-    password,
-  })
+  await db
+    .delete(reservations)
+    .where(sql`1 = 1`)
+    .execute();
 
   process.exit();
 };
